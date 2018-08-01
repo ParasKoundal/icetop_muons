@@ -128,73 +128,73 @@ def print_table(self,flag):
     if flag == "normal":
         print "Below are the signals in each tank (excluding tanks with no signal):\n"
 
-        print "{0:<20}{1:>10}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}".format(
-            " ","Lateral Dist (m)","Muon PEs","Other PEs","Total PEs","HLCs (VEM)","SLCs (VEM)","Total Signal (VEM)")
+        print "{0:<18}{1:>9}{2:^14}{3:^14}{4:^14}{5:^14}{6:^14}{7:^14}{8:^14}".format(
+            " ","Lateral Dist (m)","Muon PEs","Other PEs","Total PEs","HLCs (VEM)","SLCs (VEM)","Total VEM","nMuons")
         s = self.Signals
-        totals = np.zeros(6)
+        totals = np.zeros(7)
         nrows = 0.0
         for i in range(len(s.Tank)):
             if s.TotalPE[i] + s.TotalVEM[i] != 0:
-                signals = [s.MuonPE[i],s.OtherPE[i],s.TotalPE[i],s.HLCVEM[i],s.SLCVEM[i],s.TotalVEM[i]]
+                signals = [s.MuonPE[i],s.OtherPE[i],s.TotalPE[i],s.HLCVEM[i],s.SLCVEM[i],s.TotalVEM[i],s.nMuons[i]]
                 for j in range(len(signals)):
                     totals[j] += signals[j]
                 nrows += 1.0
-                print "{0:<20}{1:>10.2f}{2:>15.0f}{3:>15.0f}{4:>15.0f}{5:>15.2f}{6:>15.2f}{7:>15.2f}".format(
+                print "{0:<18}{1:>9.2f}{2:>14.0f}{3:>14.0f}{4:>14.0f}{5:>14.2f}{6:>14.2f}{7:>14.2f}{8:>14.0f}".format(
                     s.Tank[i],s.LatDist[i],signals[0],signals[1],signals[2],signals[3],
-                    signals[4],signals[5])
+                    signals[4],signals[5],signals[6])
         print "{0:->130}".format("")
-        print "{0:>30}{1:>15.0f}{2:>15.0f}{3:>15.0f}{4:>15.2f}{5:>15.2f}{6:>15.2f}".format("Total:",totals[0],totals[1],
-            totals[2],totals[3],totals[4],totals[5])
-        print "{0:>30}{1:>15.2f}{2:>15.2f}{3:>15.2f}{4:>15.2f}{5:>15.2f}{6:>15.2f}".format("Mean:",totals[0]/nrows,
-            totals[1]/nrows,totals[2]/nrows,totals[3]/nrows,totals[4]/nrows,totals[5]/nrows)
+        print "{0:>27}{1:>14.0f}{2:>14.0f}{3:>14.0f}{4:>14.2f}{5:>14.2f}{6:>14.2f}{7:>14.0f}".format("Total:",totals[0],totals[1],
+            totals[2],totals[3],totals[4],totals[5],totals[6])
+        print "{0:>27}{1:>14.2f}{2:>14.2f}{3:>14.2f}{4:>14.2f}{5:>14.2f}{6:>14.2f}{7:>14.2f}".format("Mean:",totals[0]/nrows,
+            totals[1]/nrows,totals[2]/nrows,totals[3]/nrows,totals[4]/nrows,totals[5]/nrows,totals[6]/nrows)
 
     # >300m TABLE
     elif flag == "300m":
         print "Below are the signals in each tank that is greater than 300m from the shower core:\n"
 
-        print "{0:<20}{1:>10}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}".format(
-            " ","Lateral Dist (m)","Muon PEs","Other PEs","Total PEs","HLCs (VEM)","SLCs (VEM)","Total Signal (VEM)")
+        print "{0:<18}{1:>9}{2:^14}{3:^14}{4:^14}{5:^14}{6:^14}{7:^14}{8:^14}".format(
+            " ","Lateral Dist (m)","Muon PEs","Other PEs","Total PEs","HLCs (VEM)","SLCs (VEM)","Total VEM","nMuons")
         s = self.Signals
-        totals = np.zeros(6)
+        totals = np.zeros(7)
         nrows = 0.0
         for i in range(len(s.Tank)):
             if s.TotalPE[i] + s.TotalVEM[i] != 0:
                 if s.LatDist[i] > 300:
-                    signals = [s.MuonPE[i],s.OtherPE[i],s.TotalPE[i],s.HLCVEM[i],s.SLCVEM[i],s.TotalVEM[i]]
+                    signals = [s.MuonPE[i],s.OtherPE[i],s.TotalPE[i],s.HLCVEM[i],s.SLCVEM[i],s.TotalVEM[i],s.nMuons[i]]
                     for j in range(len(signals)):
                         totals[j] += signals[j]
                     nrows += 1.0
-                    print "{0:<20}{1:>10.2f}{2:>15.0f}{3:>15.0f}{4:>15.0f}{5:>15.2f}{6:>15.2f}{7:>15.2f}".format(
+                    print "{0:<18}{1:>9.2f}{2:>14.0f}{3:>14.0f}{4:>14.0f}{5:>14.2f}{6:>14.2f}{7:>14.2f}{8:>14.0f}".format(
                         s.Tank[i],s.LatDist[i],signals[0],signals[1],signals[2],signals[3],
-                        signals[4],signals[5])
+                        signals[4],signals[5],signals[6])
         print "{0:->130}".format("")
-        print "{0:>30}{1:>15.0f}{2:>15.0f}{3:>15.0f}{4:>15.2f}{5:>15.2f}{6:>15.2f}".format("Total:",totals[0],totals[1],
-            totals[2],totals[3],totals[4],totals[5])
-        print "{0:>30}{1:>15.2f}{2:>15.2f}{3:>15.2f}{4:>15.2f}{5:>15.2f}{6:>15.2f}".format("Mean:",totals[0]/nrows,
-            totals[1]/nrows,totals[2]/nrows,totals[3]/nrows,totals[4]/nrows,totals[5]/nrows)
+        print "{0:>27}{1:>14.0f}{2:>14.0f}{3:>14.0f}{4:>14.2f}{5:>14.2f}{6:>14.2f}{7:>14.0f}".format("Total:",totals[0],totals[1],
+            totals[2],totals[3],totals[4],totals[5],totals[6])
+        print "{0:>27}{1:>14.2f}{2:>14.2f}{3:>14.2f}{4:>14.2f}{5:>14.2f}{6:>14.2f}{7:>14.2f}".format("Mean:",totals[0]/nrows,
+            totals[1]/nrows,totals[2]/nrows,totals[3]/nrows,totals[4]/nrows,totals[5]/nrows,totals[6]/nrows)
 
     # LONG TABLE
     elif flag == "long":
         print "Below are the signals in each tank:\n"
 
-        print "{0:<20}{1:>10}{2:^15}{3:^15}{4:^15}{5:^15}{6:^15}{7:^15}".format(
-            " ","Lateral Dist (m)","Muon PEs","Other PEs","Total PEs","HLCs (VEM)","SLCs (VEM)","Total Signal (VEM)")
+        print "{0:<18}{1:>9}{2:^14}{3:^14}{4:^14}{5:^14}{6:^14}{7:^14}{8:^14}".format(
+            " ","Lateral Dist (m)","Muon PEs","Other PEs","Total PEs","HLCs (VEM)","SLCs (VEM)","Total VEM","nMuons")
         s = self.Signals
-        totals = np.zeros(6)
+        totals = np.zeros(7)
         nrows = 0.0
         for i in range(len(s.Tank)):
-            signals = [s.MuonPE[i],s.OtherPE[i],s.TotalPE[i],s.HLCVEM[i],s.SLCVEM[i],s.TotalVEM[i]]
+            signals = [s.MuonPE[i],s.OtherPE[i],s.TotalPE[i],s.HLCVEM[i],s.SLCVEM[i],s.TotalVEM[i],s.nMuons[i]]
             for j in range(len(signals)):
                 totals[j] += signals[j]
             nrows += 1.0
-            print "{0:<20}{1:>10.2f}{2:>15.0f}{3:>15.0f}{4:>15.0f}{5:>15.2f}{6:>15.2f}{7:>15.2f}".format(
+            print "{0:<18}{1:>9.2f}{2:>14.0f}{3:>14.0f}{4:>14.0f}{5:>14.2f}{6:>14.2f}{7:>14.2f}{8:>14.0f}".format(
                 s.Tank[i],s.LatDist[i],signals[0],signals[1],signals[2],signals[3],
-                signals[4],signals[5])
+                signals[4],signals[5],signals[6])
         print "{0:->130}".format("")
-        print "{0:>30}{1:>15.0f}{2:>15.0f}{3:>15.0f}{4:>15.2f}{5:>15.2f}{6:>15.2f}".format("Total:",totals[0],totals[1],
-            totals[2],totals[3],totals[4],totals[5])
-        print "{0:>30}{1:>15.2f}{2:>15.2f}{3:>15.2f}{4:>15.2f}{5:>15.2f}{6:>15.2f}".format("Mean:",totals[0]/nrows,
-            totals[1]/nrows,totals[2]/nrows,totals[3]/nrows,totals[4]/nrows,totals[5]/nrows)
+        print "{0:>27}{1:>14.0f}{2:>14.0f}{3:>14.0f}{4:>14.2f}{5:>14.2f}{6:>14.2f}{7:>14.0f}".format("Total:",totals[0],totals[1],
+            totals[2],totals[3],totals[4],totals[5],totals[6])
+        print "{0:>27}{1:>14.2f}{2:>14.2f}{3:>14.2f}{4:>14.2f}{5:>14.2f}{6:>14.2f}{7:>14.2f}".format("Mean:",totals[0]/nrows,
+            totals[1]/nrows,totals[2]/nrows,totals[3]/nrows,totals[4]/nrows,totals[5]/nrows,totals[6]/nrows)
 
     # Bottom frame
     print "{0:->130}".format("")

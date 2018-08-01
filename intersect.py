@@ -12,7 +12,7 @@ import numpy as np
 import glob
 
 from icecube.dataio import I3File
-from icecube import icetray, dataclasses #recclasses, simclasses
+from icecube import icetray, dataclasses
 
 
 
@@ -137,18 +137,24 @@ for tank in tanks:
 
    
 # ------------------------------------------------------------------
-# Lets just look at one corsika file for now
+# We only have a limited list of corsika files right now. We will start
+# with those and ignore the rest
+corsika_list = glob.glob("/cr/data01/hagne/John_project/CORSIKA/muonsPROPER/*")
+corsika_list = [int(i[-6:]) for i in corsika_list]
 data = []
 for shower in protondata:
-    if shower.Run == 26:
+    if shower.Run in corsika_list:
         data.append(shower)
 
-number = 4
-data = data[number:number+1]
+save_list = []
 # ------------------------------------------------------------------
 
-for shower in data:
+for i in range(len(data)):
 
+    print "Starting shower",i+1,"of",str(len(data))
+    
+    shower = data[i]
+    
     run = str(shower.Run)
     file_name = "Muons" + "000000"[:-len(run)] + run
     corsika_file = corsika_location + file_name
@@ -186,9 +192,19 @@ for shower in data:
                         tank[5] += 1
                         break
     
-    print intmuon,"muons intersected tanks"
-
+    # add the new data to the shower object
+    shower.nMuons = intmuon
     for i in range(len(tanks)):
-        print "{0:<22}{1:<8}{2:<8}".format(shower.Signals.Tank[i], 
-                                    int(shower.Signals.MuonPE[i]), tanks[i][5])
+        shower.Signals.nMuons.append(tanks[i][5])
+    
+    save_list.append(shower)
+    
+    for i in range(len(tanks)):
+        if shower.Signals.MuonPE[i] > 0 and shower.Signals.nMuons == 0:
+            print "WARNING! Error in Run",shower.Run,"Event",shower.Event
+
+# save the data
+save_location = './data/'
+np.save(save_location+'proton_showers_2.npy',save_list)
+
 
