@@ -26,8 +26,8 @@ E = [15.0,15.5,16.0,16.5,17.0]
 # the energy ranges are numbered by increasing energy, starting with 0
 E_dict = dict()
 for i in range(len(E)-1):
-    E_dict[i] = [[],[]] # first array for muon PEs, second for total VEMs
-
+    # first array for muon PEs, second for total VEMs, then HLC, then SLC
+    E_dict[i] = [[],[],[],[]]
 
 # where to find data
 data_location = './data/'
@@ -35,8 +35,10 @@ data_location = './data/'
 #load the data
 if element == 1:
     Data = np.load(data_location+"proton_showers.npy")
+    primary = "Proton"
 elif element == 2:
     Data = np.load(data_location+"iron_showers.npy")
+    primary = "Iron"
 else:
     print "Please set 'element' to either 1 (proton) or 2 (iron)"
     exit()
@@ -48,8 +50,12 @@ for shower in Data:
     for j in range(len(E)-1):
         if np.log10(shower.Primary.Energy) >= E[j] and \
         np.log10(shower.Primary.Energy) < E[j+1]:
-            PE300_  = 0 # sum of muon PEs >300m in this shower
-            VEM300_ = 0 # sum of VEMs >300m in this shower
+            
+            muonPE_  = 0
+            Tot_     = 0
+            HLC_     = 0
+            SLC_     = 0
+            
             for i in range(len(shower.Signals.Tank)): # loop through every tank
                 if shower.Signals.LatDist[i] >= distance and \
                 shower.Signals.TotalPE[i] > 0:
@@ -61,14 +67,22 @@ for shower in Data:
                     scaledPE = scale*shower.Signals.MuonPE[i]
                     
                     # sum signals that are within cuts
-                    if scaledPE > q_lowerlimit and scaledPE < q_upperlimit:
-                        PE300_ += scaledPE
-                    if totalVEM > q_lowerlimit and totalVEM < q_upperlimit:
-                        VEM300_ += totalVEM
+                    if scaledPE >= q_lowerlimit and scaledPE <= q_upperlimit:
+                        muonPE_ += scaledPE
+                    if totalVEM >= q_lowerlimit and totalVEM <= q_upperlimit:
+                        Tot_ += totalVEM
+                    if shower.Signals.HLCVEM[i] >= q_lowerlimit and \
+                    shower.Signals.HLCVEM[i] <= q_upperlimit:
+                        HLC_ += shower.Signals.HLCVEM[i]
+                    if shower.Signals.SLCVEM[i] >= q_lowerlimit and \
+                    shower.Signals.SLCVEM[i] <= q_upperlimit:
+                        SLC_ += shower.Signals.SLCVEM[i]
 
             # add the summed signals to the array for the corr. energy range
-            E_dict[j][0].append(PE300_)
-            E_dict[j][1].append(VEM300_)
+            E_dict[j][0].append(muonPE_)
+            E_dict[j][1].append(Tot_)
+            E_dict[j][2].append(HLC_)
+            E_dict[j][3].append(SLC_)
 
 
 
@@ -76,40 +90,46 @@ for shower in Data:
 # Figure -----------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
-plt.rcParams["figure.figsize"] = [8,7]
-fig, ax = plt.subplots(1,1)
+plt.rcParams["figure.figsize"] = [15,5]
+fig, (ax1,ax2,ax3) = plt.subplots(1,3)
 
 # plot the energy ranges
+#colors = ['blue','orange','green','red']
+colors = sns.color_palette()
+counter = 0
 for i in E_dict:
     label = str(E[i])+" < log(E) < "+str(E[i+1])
-    sns.regplot(x=E_dict[i][0],y=E_dict[i][1],x_bins=10,ci=95,label=label,ax=ax)
+    sns.regplot(x=E_dict[i][0],y=E_dict[i][2],x_bins=10,ci=95,label=label,
+                                                ax=ax1,color=colors[counter])
+    sns.regplot(x=E_dict[i][0],y=E_dict[i][3],x_bins=10,ci=95,label=label,
+                                                ax=ax2,color=colors[counter])
+    sns.regplot(x=E_dict[i][0],y=E_dict[i][1],x_bins=10,ci=95,label=label,
+                                                ax=ax3,color=colors[counter])
+    counter += 1
     
-    
+
 # main title
-cuts = "Cuts:  tank >"+str(distance)+"m from shower core\n"+str(q_lowerlimit)+ \
+cuts = "Cuts:  tank >"+str(distance)+"m from shower core,   "+str(q_lowerlimit)+ \
                                     " VEM < charge < "+str(q_upperlimit)+" VEM"
-fig.suptitle(cuts,fontsize=12)
+fig.suptitle("Primary: "+primary+"     "+cuts,fontsize=15)
+
 # axis titles
-ax.set_xlabel("Charge of Photoelectrons from Muons (VEM)")
-ax.set_ylabel("Total Charge (VEM)")
+ax1.set_xlabel("Charge of Photoelectrons from Muons (VEM)")
+ax2.set_xlabel("Charge of Photoelectrons from Muons (VEM)")
+ax3.set_xlabel("Charge of Photoelectrons from Muons (VEM)")
+
+ax1.set_ylabel("HLC Charge (VEM)")
+ax2.set_ylabel("SLC Charge (VEM)")
+ax3.set_ylabel("Total Charge (VEM)")
 # legend
-leg = ax.legend()
-# Primary type
-if element == 1:
-    ax.text(0.75,0.01,"Primary: Proton",dict(size='large'),transform = ax.transAxes)
-elif element == 2:
-    ax.text(0.80,0.01,"Primary: Iron",dict(size='large'),transform = ax.transAxes)
-
-
+ax1.legend()
+ax2.legend()
+ax3.legend()
 
 # save the figure
 figure_location = "./figures/"
-if element == 1:
-    figure_name = figure_location + 'muon_charge_E_binned_past_'+str(distance)+\
-                                                                'm_Proton.png'
-elif element == 2:
-    figure_name = figure_location + 'muon_charge_E_binned_past_'+str(distance)+\
-                                                                    'm_Iron.png'
+figure_name = figure_location + 'muon_charge_E_binned_past_'+str(distance)+'m_'\
+                                                            +primary+'.png'
 
 print "Saving figure "+figure_name
 pylab.savefig(figure_name, bbox_inches='tight')
