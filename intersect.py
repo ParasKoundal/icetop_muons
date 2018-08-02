@@ -88,8 +88,8 @@ def intersect(x,y,z,nx,ny,nz,tank):
 
 #load the showers
 data_location = './data/'
-protondata = np.load(data_location + 'proton_showers_short.npy')
-#irondata = np.load(data_location + 'iron_showers_short.npy')
+protondata = np.load(data_location + 'proton_showers.npy')
+#irondata = np.load(data_location + 'iron_showers.npy')
 
 
 #corsika file location
@@ -137,16 +137,17 @@ for tank in tanks:
 
    
 # ------------------------------------------------------------------
-# We only have a limited list of corsika files right now. We will start
-# with those and ignore the rest
-corsika_list = glob.glob("/cr/data01/hagne/John_project/CORSIKA/muonsPROPER/*")
-corsika_list = [int(i[-6:]) for i in corsika_list]
+# We only have a limited number of CORSIKA files right now
+# AND some of those we've alread done. So we'll use a list of run numbers to
+# determine which showers we want to do.
+corsika_list = np.load("list1.npy")
 data = []
 for shower in protondata:
     if shower.Run in corsika_list:
         data.append(shower)
+del protondata # don't keep the whole list because it takes up memory
 
-save_list = []
+save_list = [] # this is the list of showers to save in a new file
 # ------------------------------------------------------------------
 
 for i in range(len(data)):
@@ -205,6 +206,6 @@ for i in range(len(data)):
 
 # save the data
 save_location = './data/'
-np.save(save_location+'proton_showers_2.npy',save_list)
+np.save(save_location+'proton_showers_new_save.npy',save_list)
 
 
