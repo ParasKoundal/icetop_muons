@@ -14,7 +14,7 @@ import seaborn as sns
 import os
 
 # SETTINGS ---------------------------------------------------------------------
-element      = 2 # set 1 for protons, 2 for iron
+element      = 1 # set 1 for protons, 2 for iron
 distance     = 300 # set distance where we make cut on signal, unit: meters
 q_lowerlimit = 0.6 # lower cut for tank charge, unit: VEM
 q_upperlimit = 2.0 # upper cut for tank charge, unit: VEM
