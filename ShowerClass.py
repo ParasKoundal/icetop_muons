@@ -41,6 +41,7 @@ class Primary:
         self.x        = None
         self.y        = None
         self.z        = None
+        self.zen      = None
     def CoreDist(self):
         return np.sqrt(self.x**2 + self.y**2)
 

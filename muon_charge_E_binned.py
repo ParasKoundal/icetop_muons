@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# This script makes a plot of total VEMs vs VEMs from muons
+# This script makes a plot of signals vs VEMs from muons
 # It bins showers by energy ranges (found in settings) and plots each range as a
 # different color. The points on the plot are also binned and averaged, and a
 # and a line is fit to the averages
@@ -93,8 +93,7 @@ for shower in Data:
 plt.rcParams["figure.figsize"] = [15,5]
 fig, (ax1,ax2,ax3) = plt.subplots(1,3)
 
-# plot the energy ranges
-#colors = ['blue','orange','green','red']
+# plot the energy ranges, all 3 signals
 colors = sns.color_palette()
 counter = 0
 for i in E_dict:
