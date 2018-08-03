@@ -2,7 +2,7 @@
 
 # This code takes an icetop shower, matches it to its corsika file, then
 # calculates how many muons hit IceTop (and where). It then stores this info in
-# the shower object as shower.nMuons
+# the shower object as shower.Signals.nMuons
 
 # First is a function that determines whether a muon intersects a tank, given
 # the muon's position and direction and the tank position
@@ -185,7 +185,6 @@ for i in range(len(data)):
                 ny = float(line[5])
                 nz = float(line[6])
 
-                #ang = np.arctan(np.sqrt(nx**2+ny**2)/nz)*180/np.pi
                 for tank in tanks:
                     flag = intersect(x,y,z,nx,ny,nz,tank)
                     if flag == True:
@@ -194,14 +193,14 @@ for i in range(len(data)):
                         break
     
     # add the new data to the shower object
-    shower.nMuons = intmuon
+    shower.TotalMuons = intmuon
     for i in range(len(tanks)):
         shower.Signals.nMuons.append(tanks[i][5])
     
     save_list.append(shower)
     
     for i in range(len(tanks)):
-        if shower.Signals.MuonPE[i] > 0 and shower.Signals.nMuons == 0:
+        if shower.Signals.MuonPE[i] > 0 and shower.Signals.nMuons[i] == 0:
             print "WARNING! Error in Run",shower.Run,"Event",shower.Event
 
 # save the data

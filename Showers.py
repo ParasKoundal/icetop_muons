@@ -2,7 +2,7 @@
 
 # This script takes I3 simulation files and and stores relevant data (plus some 
 # meta data) in the Shower data structure, defined in ShowerClass.py. The data 
-# is saved data folder.
+# is saved in the data folder.
 # Note that it stores all the data during run and then saves it all at the end. 
 # Thus you can use the current data structures in the data folder while this 
 # program is running. At the end of execution, this program will then update 
@@ -215,8 +215,8 @@ for file_number in range(nfiles):
         Laputop = frame["LaputopStandard"]
         LaputopParams = frame["LaputopStandardParams"]
         
-        shower.Reconstruction.E_Proton = LaputopParams.e_proton
-        shower.Reconstruction.E_Iron = LaputopParams.e_iron
+        shower.Reconstruction.E_Proton = LaputopParams.e_proton*10**9
+        shower.Reconstruction.E_Iron = LaputopParams.e_iron*10**9
         shower.Reconstruction.x = Laputop.pos.x
         shower.Reconstruction.y = Laputop.pos.y
         shower.Reconstruction.z = Laputop.pos.z

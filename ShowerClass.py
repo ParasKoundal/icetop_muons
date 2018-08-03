@@ -20,7 +20,7 @@ class Shower:
         self.TotalMuons     = None
         self.nMuonPulses    = None
         self.Signals        = Signals()
-        self.Reconstruction = Primary()
+        self.Reconstruction = Reconstruction()
 
     # Functions to print a table that summarizes the shower
     # see the bottom for the function that prints the tables

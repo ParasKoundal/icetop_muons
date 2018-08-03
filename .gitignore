@@ -1,0 +1,10 @@
+# ignore temporary files
+temp*
+
+# ignore the large data files
+proton_showers.npy
+iron_showers.npy
+*.i3.*
+
+# ignore python bytecode files
+*.pyc

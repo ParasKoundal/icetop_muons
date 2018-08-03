@@ -34,7 +34,7 @@ signal = []
 for shower in Data:
     if shower.Primary.Energy > E_lowerlimit and \
     shower.Primary.Energy < E_upperlimit:
-        S500_ = shower.S500
+        S500_ = shower.Reconstruction.S500
         signal_ = 0
 
         for i in range(len(shower.Signals.Tank)):
