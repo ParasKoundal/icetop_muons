@@ -14,24 +14,18 @@ import numpy as np
 class Shower:
 
     def __init__(self):
-        self.Run         = None
-        self.Event       = None
-        self.Primary     = Primary()
-        self.nMuons      = None
-        self.TotalMuons  = None
-        self.nMuonPulses = None
-        self.Signals     = Signals()
-        self.S500        = None
+        self.Run            = None
+        self.Event          = None
+        self.Primary        = Primary()
+        self.TotalMuons     = None
+        self.nMuonPulses    = None
+        self.Signals        = Signals()
+        self.Reconstruction = Primary()
 
     # Functions to print a table that summarizes the shower
     # see the bottom for the function that prints the tables
-    def Table(self):
-        print_table(self,"normal")
-    def Table_300m(self):
-        print_table(self,"300m")
-    def Table_Long(self):
-        print_table(self,"long")
-
+    def Table(self,dist=0):
+        print_table(self,dist)
 
 # attributes of the primary of the shower
 class Primary:
@@ -58,6 +52,17 @@ class Signals:
         self.TotalVEM = []   
         self.nMuons   = []
 
+class Reconstruction:
+    def __init__(self):
+        self.E_Proton = None
+        self.E_Iron   = None
+        self.x        = None
+        self.y        = None
+        self.z        = None
+        self.zen      = None
+        self.S500     = None
+    def CoreDist(self):
+        return np.sqrt(self.x**2 + self.y**2)
 # ----------------------------------------------------------------------
 # ----------------------------------------------------------------------
 
@@ -71,7 +76,7 @@ def LatDist(xc,yc,zc,N,key,geometry):
     xi   = geometry.omgeo[key].position.x 
     yi   = geometry.omgeo[key].position.y 
     zi   = geometry.omgeo[key].position.z
-    R    = [xi-xc, yi-yc, zi-zc] # vector that points from shower core to the event
+    R    = [xi-xc, yi-yc, zi-zc] # vector that points from shower core to tank
 
     d    = np.linalg.norm(R) # distance from shower core
     latd = np.sqrt( d**2 - np.dot(N,R)**2 ) # distance from shower axis
@@ -104,98 +109,41 @@ def which_tank(key):
 
 
 # The function below prints a table that summarizes the shower
-# the header is always the same, but there are three options for printing out the tank-by-tank data:
-#   normal - this prints out every tank with a signal
-#   past_300 - this only prints tanks whose lateral distance from the shower core is > 300m
-#   long - this prints out every tank, even the ones without a signal
+# the header prints a summary of the shower
+# after the header is a table that shows the tank-by-tank data
+# there is an optional paramter 'dist' that allows you to put a cut on tank
+# distance. Example: shower.Table(300) only prints the tanks that are greater
+# than 300m from the shower core.
 
-def print_table(self,flag):
+def print_table(self,dist):
 
     # HEADER --------------------------------------
     print "\n\n{0:->130}".format("")
     print "{0:->130}".format("")
     print "SHOWER SUMMARY"
     print "Run:",self.Run," Event:",self.Event
-    print "Primary:",self.Primary.Type,"{0:.4} eV".format(self.Primary.Energy)
+    print "Primary:",self.Primary.Type,"  {0:.4} eV".format(self.Primary.Energy),"  zenith: {0:.4}".format(self.Primary.zen)
     print "Shower core is {0:.2f}m from the center of IceTop".format(self.Primary.CoreDist())
-    print "The original Corsika shower had {0:,} muons".format(self.TotalMuons)
+    print str(self.TotalMuons)+" muons hit detectors"
     print "There were",self.nMuonPulses,"muon pulses in IceTop"
-    print "S500 = {0:.4f}".format(self.S500)
+    #print "S500 = {0:.4f}".format(self.S500)
     print "{0:->130}".format("\n")
 
-    # TANK-BY-TANK DARA ---------------------------
-
-    # NORMAL TABLE
-    if flag == "normal":
+    # TANK-BY-TANK DATA ---------------------------
+    if dist == 0:
         print "Below are the signals in each tank (excluding tanks with no signal):\n"
-
-        print "{0:<18}{1:>9}{2:^14}{3:^14}{4:^14}{5:^14}{6:^14}{7:^14}{8:^14}".format(
+    else:
+        print "Below are the signals in each tank >"+str(dist)+"m from the core (excluding tanks with no signal):\n"
+    
+    print "{0:<18}{1:>9}{2:^14}{3:^14}{4:^14}{5:^14}{6:^14}{7:^14}{8:^14}".format(
             " ","Lateral Dist (m)","Muon PEs","Other PEs","Total PEs","HLCs (VEM)","SLCs (VEM)","Total VEM","nMuons")
-        s = self.Signals
-        totals = np.zeros(7)
-        nrows = 0.0
-        for i in range(len(s.Tank)):
-            if s.TotalPE[i] + s.TotalVEM[i] != 0:
-                signals = [s.MuonPE[i],s.OtherPE[i],s.TotalPE[i],s.HLCVEM[i],s.SLCVEM[i],s.TotalVEM[i],s.nMuons[i]]
-                for j in range(len(signals)):
-                    totals[j] += signals[j]
-                nrows += 1.0
+    s = self.Signals
+    for i in range(len(s.Tank)):
+        if s.TotalPE[i] + s.TotalVEM[i] != 0:
+            if s.LatDist[i] >= dist:
                 print "{0:<18}{1:>9.2f}{2:>14.0f}{3:>14.0f}{4:>14.0f}{5:>14.2f}{6:>14.2f}{7:>14.2f}{8:>14.0f}".format(
-                    s.Tank[i],s.LatDist[i],signals[0],signals[1],signals[2],signals[3],
-                    signals[4],signals[5],signals[6])
-        print "{0:->130}".format("")
-        print "{0:>27}{1:>14.0f}{2:>14.0f}{3:>14.0f}{4:>14.2f}{5:>14.2f}{6:>14.2f}{7:>14.0f}".format("Total:",totals[0],totals[1],
-            totals[2],totals[3],totals[4],totals[5],totals[6])
-        print "{0:>27}{1:>14.2f}{2:>14.2f}{3:>14.2f}{4:>14.2f}{5:>14.2f}{6:>14.2f}{7:>14.2f}".format("Mean:",totals[0]/nrows,
-            totals[1]/nrows,totals[2]/nrows,totals[3]/nrows,totals[4]/nrows,totals[5]/nrows,totals[6]/nrows)
+                    s.Tank[i],s.LatDist[i],s.MuonPE[i],s.OtherPE[i],s.TotalPE[i],s.HLCVEM[i],s.SLCVEM[i],s.TotalVEM[i],s.nMuons[i])
 
-    # >300m TABLE
-    elif flag == "300m":
-        print "Below are the signals in each tank that is greater than 300m from the shower core:\n"
-
-        print "{0:<18}{1:>9}{2:^14}{3:^14}{4:^14}{5:^14}{6:^14}{7:^14}{8:^14}".format(
-            " ","Lateral Dist (m)","Muon PEs","Other PEs","Total PEs","HLCs (VEM)","SLCs (VEM)","Total VEM","nMuons")
-        s = self.Signals
-        totals = np.zeros(7)
-        nrows = 0.0
-        for i in range(len(s.Tank)):
-            if s.TotalPE[i] + s.TotalVEM[i] != 0:
-                if s.LatDist[i] > 300:
-                    signals = [s.MuonPE[i],s.OtherPE[i],s.TotalPE[i],s.HLCVEM[i],s.SLCVEM[i],s.TotalVEM[i],s.nMuons[i]]
-                    for j in range(len(signals)):
-                        totals[j] += signals[j]
-                    nrows += 1.0
-                    print "{0:<18}{1:>9.2f}{2:>14.0f}{3:>14.0f}{4:>14.0f}{5:>14.2f}{6:>14.2f}{7:>14.2f}{8:>14.0f}".format(
-                        s.Tank[i],s.LatDist[i],signals[0],signals[1],signals[2],signals[3],
-                        signals[4],signals[5],signals[6])
-        print "{0:->130}".format("")
-        print "{0:>27}{1:>14.0f}{2:>14.0f}{3:>14.0f}{4:>14.2f}{5:>14.2f}{6:>14.2f}{7:>14.0f}".format("Total:",totals[0],totals[1],
-            totals[2],totals[3],totals[4],totals[5],totals[6])
-        print "{0:>27}{1:>14.2f}{2:>14.2f}{3:>14.2f}{4:>14.2f}{5:>14.2f}{6:>14.2f}{7:>14.2f}".format("Mean:",totals[0]/nrows,
-            totals[1]/nrows,totals[2]/nrows,totals[3]/nrows,totals[4]/nrows,totals[5]/nrows,totals[6]/nrows)
-
-    # LONG TABLE
-    elif flag == "long":
-        print "Below are the signals in each tank:\n"
-
-        print "{0:<18}{1:>9}{2:^14}{3:^14}{4:^14}{5:^14}{6:^14}{7:^14}{8:^14}".format(
-            " ","Lateral Dist (m)","Muon PEs","Other PEs","Total PEs","HLCs (VEM)","SLCs (VEM)","Total VEM","nMuons")
-        s = self.Signals
-        totals = np.zeros(7)
-        nrows = 0.0
-        for i in range(len(s.Tank)):
-            signals = [s.MuonPE[i],s.OtherPE[i],s.TotalPE[i],s.HLCVEM[i],s.SLCVEM[i],s.TotalVEM[i],s.nMuons[i]]
-            for j in range(len(signals)):
-                totals[j] += signals[j]
-            nrows += 1.0
-            print "{0:<18}{1:>9.2f}{2:>14.0f}{3:>14.0f}{4:>14.0f}{5:>14.2f}{6:>14.2f}{7:>14.2f}{8:>14.0f}".format(
-                s.Tank[i],s.LatDist[i],signals[0],signals[1],signals[2],signals[3],
-                signals[4],signals[5],signals[6])
-        print "{0:->130}".format("")
-        print "{0:>27}{1:>14.0f}{2:>14.0f}{3:>14.0f}{4:>14.2f}{5:>14.2f}{6:>14.2f}{7:>14.0f}".format("Total:",totals[0],totals[1],
-            totals[2],totals[3],totals[4],totals[5],totals[6])
-        print "{0:>27}{1:>14.2f}{2:>14.2f}{3:>14.2f}{4:>14.2f}{5:>14.2f}{6:>14.2f}{7:>14.2f}".format("Mean:",totals[0]/nrows,
-            totals[1]/nrows,totals[2]/nrows,totals[3]/nrows,totals[4]/nrows,totals[5]/nrows,totals[6]/nrows)
 
     # Bottom frame
     print "{0:->130}".format("")

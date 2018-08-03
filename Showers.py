@@ -14,8 +14,8 @@
 # make sure IceTray environment is active
 import os
 if not 'I3_BUILD' in os.environ:
-    raise Exception('To run this script start an IceTray environment \n This \
-                     can be achieved via ./env-shell.sh')
+    raise Exception('To run this script start an IceTray environment \n' + \
+                     'This can be achieved via ./env-shell.sh')
 # ------------------------------------------------------------------------------
 
 
@@ -79,7 +79,7 @@ for file_number in range(nfiles):
         xc  = shower.Primary.x = MCPrim.pos.x
         yc  = shower.Primary.y = MCPrim.pos.y
         zc  = shower.Primary.z = MCPrim.pos.z
-        zen = MCPrim.dir.zenith # in radians
+        zen = shower.Primary.zen = MCPrim.dir.zenith # in radians
         azi = MCPrim.dir.azimuth # in radians
 
         # unit vector pointing back along primary trajectory 
@@ -90,17 +90,6 @@ for file_number in range(nfiles):
         N  = [nx,ny,nz]
 
         tcr = MCPrim.time # I will accept signals within 1000 ns of this
-
-
-        # ----------------------------------------------------------------------
-        # Total Number of Muons ------------------------------------------------
-        # ----------------------------------------------------------------------
-
-        # number of muons
-        corsika = frame["MCPrimaryInfo"]
-        longprof = corsika.longProfile
-        # take muon number from greatest depth
-        shower.TotalMuons = longprof[-1].numMuMinus + longprof[-1].numMuPlus
 
 
         # ----------------------------------------------------------------------
@@ -216,15 +205,25 @@ for file_number in range(nfiles):
             shower.Signals.HLCVEM.append(Signals_dict[tank][4])
             shower.Signals.SLCVEM.append(Signals_dict[tank][5])
             shower.Signals.TotalVEM.append(Signals_dict[tank][6])
+            shower.Signals.nMuons.append(-1)
 
 
         # ----------------------------------------------------------------------
-        # S500 -----------------------------------------------------------------
+        # Reconstruction -------------------------------------------------------
         # ----------------------------------------------------------------------
 
-        Laputop = frame["LaputopStandardParams"]
-        shower.S500 = Laputop.s500
-
+        Laputop = frame["LaputopStandard"]
+        LaputopParams = frame["LaputopStandardParams"]
+        
+        shower.Reconstruction.E_Proton = LaputopParams.e_proton
+        shower.Reconstruction.E_Iron = LaputopParams.e_iron
+        shower.Reconstruction.x = Laputop.pos.x
+        shower.Reconstruction.y = Laputop.pos.y
+        shower.Reconstruction.z = Laputop.pos.z
+        shower.Reconstruction.zen = Laputop.dir.zenith
+        shower.Reconstruction.S500 = LaputopParams.s500
+        
+        
         # ----------------------------------------------------------------------
         # Save Shower ----------------------------------------------------------
         # ----------------------------------------------------------------------
@@ -246,7 +245,7 @@ for file_number in range(nfiles):
 save_location = './data/'
 
 np.save(save_location+'proton_showers.npy',ProtonData)
-np.save(save_location+'iron_shower.npy',IronData)
+np.save(save_location+'iron_showers.npy',IronData)
 
 
 
