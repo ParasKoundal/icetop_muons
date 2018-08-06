@@ -6,40 +6,40 @@ NNdata300 = []
 NNdata400 = []
 
 def process_shower(shower):
-    E_proton  = shower.Reconstruction.E_Proton
-    E_iron    = shower.Reconstruction.E_Iron
+    E_proton  = float(shower.Reconstruction.E_Proton)
+    E_iron    = float(shower.Reconstruction.E_Iron)
     E_avg     = np.sqrt(E_proton*E_iron) # geometric mean
-    Zen       = shower.Reconstruction.zen
-    coredist  = shower.Reconstruction.CoreDist()
-    Type      = shower.Primary.Type
+    Zen       = float(shower.Reconstruction.zen)
+    coredist  = float(shower.Reconstruction.CoreDist())
+    Type      = str(shower.Primary.Type)
     
     # for log(E_avg) < 16.5
-    Q300      = 0
-    MuonPE300 = 0
-    nMuon300  = 0
+    Q300      = 0.
+    MuonPE300 = 0.
+    nMuon300  = 0.
     
     # for log(E_avg) > 16.5
-    Q400      = 0
-    MuonPE400 = 0
-    nMuon400  = 0
+    Q400      = 0.
+    MuonPE400 = 0.
+    nMuon400  = 0.
     
     if np.log10(E_avg) < 16.5:
         for i in range(len(shower.Signals.Tank)):
             if shower.Signals.LatDist[i] > 300:
-                nMuon300 += shower.Signals.nMuons[i]
-                MuonPE300 += shower.Signals.MuonPE[i]
+                nMuon300 += float(shower.Signals.nMuons[i])
+                MuonPE300 += float(shower.Signals.MuonPE[i])
                 if shower.Signals.TotalVEM[i] >= 0.6 and shower.Signals.TotalVEM[i] <= 2.0:
-                    Q300 += shower.Signals.TotalVEM[i]
+                    Q300 += float(shower.Signals.TotalVEM[i])
         
         NNdata300.append([E_proton,E_iron,Zen,coredist,Q300,MuonPE300,nMuon300,Type])
     
     else:
         for i in range(len(shower.Signals.Tank)):
             if shower.Signals.LatDist[i] > 400:
-                nMuon400 += shower.Signals.nMuons[i]
-                MuonPE400 += shower.Signals.MuonPE[i]
+                nMuon400 += float(shower.Signals.nMuons[i])
+                MuonPE400 += float(shower.Signals.MuonPE[i])
                 if shower.Signals.TotalVEM[i] >= 0.6 and shower.Signals.TotalVEM[i] <= 2.0:
-                    Q400 += shower.Signals.TotalVEM[i]
+                    Q400 += float(shower.Signals.TotalVEM[i])
                     
         NNdata400.append([E_proton,E_iron,Zen,coredist,Q400,MuonPE400,nMuon400,Type])
 
