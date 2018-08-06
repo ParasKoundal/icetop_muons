@@ -4,6 +4,7 @@ temp*
 # ignore the large data files
 proton_showers.npy
 iron_showers.npy
+proton_showers_nmuons.npy
 *.i3.*
 
 # ignore python bytecode files
