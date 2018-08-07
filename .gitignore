@@ -9,3 +9,6 @@ proton_showers_nmuons.npy
 
 # ignore python bytecode files
 *.pyc
+
+# ignore ipynb checkpoints
+.ipynb_checkpoints
