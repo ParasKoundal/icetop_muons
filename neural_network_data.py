@@ -22,24 +22,33 @@ def process_shower(shower):
     Q400      = 0.
     MuonPE400 = 0.
     nMuon400  = 0.
-    
+
+
     if np.log10(E_avg) < 16.5:
         for i in range(len(shower.Signals.Tank)):
             if shower.Signals.LatDist[i] > 300:
-                nMuon300 += float(shower.Signals.nMuons[i])
-                MuonPE300 += float(shower.Signals.MuonPE[i])
-                if shower.Signals.TotalVEM[i] >= 0.6 and shower.Signals.TotalVEM[i] <= 2.0:
-                    Q300 += float(shower.Signals.TotalVEM[i])
+                totalVEM = shower.Signals.TotalVEM[i]
+                totalPE  = shower.Signals.TotalPE[i]
+                scale = totalVEM/totalPE
+                scaledPE = scale*shower.Signals.MuonPE[i]
+                nMuon300 += shower.Signals.nMuons[i]
+                MuonPE300 += scaledPE
+                if totalVEM >= 0.6 and totalVEM <= 2.0:
+                    Q300 += totalVEM
         
         NNdata300.append([E_proton,E_iron,Zen,coredist,Q300,MuonPE300,nMuon300,Type])
     
     else:
         for i in range(len(shower.Signals.Tank)):
             if shower.Signals.LatDist[i] > 400:
-                nMuon400 += float(shower.Signals.nMuons[i])
-                MuonPE400 += float(shower.Signals.MuonPE[i])
-                if shower.Signals.TotalVEM[i] >= 0.6 and shower.Signals.TotalVEM[i] <= 2.0:
-                    Q400 += float(shower.Signals.TotalVEM[i])
+                totalVEM = shower.Signals.TotalVEM[i]
+                totalPE  = shower.Signals.TotalPE[i]
+                scale = totalVEM/totalPE
+                scaledPE = scale*shower.Signals.MuonPE[i]
+                nMuon400 += shower.Signals.nMuons[i]
+                MuonPE400 += scaledPE
+                if totalVEM >= 0.6 and totalVEM <= 2.0:
+                    Q400 += totalVEM
                     
         NNdata400.append([E_proton,E_iron,Zen,coredist,Q400,MuonPE400,nMuon400,Type])
 
