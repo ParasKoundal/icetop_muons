@@ -27,7 +27,7 @@ def process_showers(showers):
                 scaledPE = scale*shower.Signals.MuonPE[i]
                 nMuons   += shower.Signals.nMuons[i]
                 MuonVEM += scaledPE
-                if totalVEM >= 0.6 and totalVEM <= 2.0:
+                if totalVEM >= 0.8 and totalVEM <= 2.0:
                     Q400 += totalVEM
 
         List.append([Run,E_proton,E_iron,Zen,Q400,MuonVEM,nMuons,Type])
