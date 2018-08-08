@@ -42,7 +42,7 @@ def avg_runs(List,Type):
     for shower in List:
         run_list.add(shower[0])
     
-    for run in run_list:
+    for Run in run_list:
         nShowers     = 0.
         E_proton_tot = 0.
         E_iron_tot   = 0.
@@ -51,14 +51,14 @@ def avg_runs(List,Type):
         MuonVEM_tot  = 0.
         nMuons_tot    = 0.
         for shower in List:
-            if shower[0] == run:
+            if shower[0] == Run:
                 nShowers     += 1.
                 E_proton_tot += shower[1]
                 E_iron_tot   += shower[2]
                 Zen_tot      += shower[3]
                 Q400_tot     += shower[4]
                 MuonVEM_tot  += shower[5]
-                nMuons_tot    += shower[6]
+                nMuons_tot   += shower[6]
                 
         E_proton_avg = E_proton_tot/nShowers
         E_iron_avg   = E_iron_tot/nShowers
@@ -66,7 +66,7 @@ def avg_runs(List,Type):
         Q400_avg     = Q400_tot/nShowers
         MuonVEM_avg  = MuonVEM_tot/nShowers
         nMuons_avg    = nMuons_tot/nShowers
-        avgList.append([E_proton_avg,E_iron_avg,Zen_avg,Q400_avg,MuonVEM_avg,nMuons_avg,Type])
+        avgList.append([Run,E_proton_avg,E_iron_avg,Zen_avg,Q400_avg,MuonVEM_avg,nMuons_avg,Type])
     
     return avgList
 
