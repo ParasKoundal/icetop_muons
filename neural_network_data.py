@@ -29,7 +29,7 @@ def process_showers(showers):
                 MuonVEM += scaledPE
                 SLC = shower.Signals.SLCVEM[i]
                 if SLC >= 0.6 and SLC <= 2.0:
-                    Q400 += totalVEM
+                    Q400 += SLC
 
         List.append([Run,E_proton,E_iron,Zen,Q400,MuonVEM,nMuons,Type])
     return List
