@@ -13,14 +13,15 @@ def process_showers(showers):
         Zen       = shower.Reconstruction.zen
         Type      = shower.Primary.Type
         
-
-        Q400    = 0.
+        cut_dist = 400
+        
+        Q       = 0.
         MuonVEM = 0.
-        nMuons   = 0.
+        nMuons  = 0.
 
         
         for i in range(len(shower.Signals.Tank)):
-            if shower.Signals.LatDist[i] > 400 and shower.Signals.TotalPE[i] != 0:
+            if shower.Signals.LatDist[i] >= cut_dist and shower.Signals.TotalPE[i] != 0:
                 totalVEM = shower.Signals.TotalVEM[i]
                 totalPE  = shower.Signals.TotalPE[i]
                 scale    = totalVEM/totalPE
@@ -28,9 +29,9 @@ def process_showers(showers):
                 nMuons   += shower.Signals.nMuons[i]
                 MuonVEM += scaledPE
                 if totalVEM >= 0.8 and totalVEM <= 2.0:
-                    Q400 += totalVEM
+                    Q += totalVEM
 
-        List.append([Run,E_proton,E_iron,Zen,Q400,MuonVEM,nMuons,Type])
+        List.append([Run,E_proton,E_iron,Zen,Q,MuonVEM,nMuons,Type])
     return List
 
 # function that avarages the NN data for each run
@@ -47,26 +48,26 @@ def avg_runs(List,Type):
         E_proton_tot = 0.
         E_iron_tot   = 0.
         Zen_tot      = 0.
-        Q400_tot     = 0.
+        Q_tot        = 0.
         MuonVEM_tot  = 0.
-        nMuons_tot    = 0.
+        nMuons_tot   = 0.
         for shower in List:
             if shower[0] == Run:
                 nShowers     += 1.
                 E_proton_tot += shower[1]
                 E_iron_tot   += shower[2]
                 Zen_tot      += shower[3]
-                Q400_tot     += shower[4]
+                Q_tot        += shower[4]
                 MuonVEM_tot  += shower[5]
                 nMuons_tot   += shower[6]
                 
         E_proton_avg = E_proton_tot/nShowers
         E_iron_avg   = E_iron_tot/nShowers
         Zen_avg      = Zen_tot/nShowers
-        Q400_avg     = Q400_tot/nShowers
+        Q_avg        = Q_tot/nShowers
         MuonVEM_avg  = MuonVEM_tot/nShowers
-        nMuons_avg    = nMuons_tot/nShowers
-        avgList.append([Run,E_proton_avg,E_iron_avg,Zen_avg,Q400_avg,MuonVEM_avg,nMuons_avg,Type])
+        nMuons_avg   = nMuons_tot/nShowers
+        avgList.append([Run,E_proton_avg,E_iron_avg,Zen_avg,Q_avg,MuonVEM_avg,nMuons_avg,Type])
     
     return avgList
 
@@ -91,8 +92,8 @@ NNdata_avg = np.concatenate((NNdata_proton_avg,NNdata_iron_avg))
 
 # save the data
 
-print 'saving ./data/NN_data_400m.npy'
-np.save('./data/NN_data_400m.npy',NNdata)
+print 'saving ./data/NN_data.npy'
+np.save('./data/NN_data.npy',NNdata)
 
-print 'saving ./data/NN_data_400m_avg.npy'
-np.save('./data/NN_data_400m_avg.npy',NNdata_avg)
+print 'saving ./data/NN_data_avg.npy'
+np.save('./data/NN_data_avg.npy',NNdata_avg)

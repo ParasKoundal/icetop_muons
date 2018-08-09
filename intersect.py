@@ -140,7 +140,7 @@ for tank in tanks:
 # We only have a limited number of CORSIKA files right now
 # AND some of those we've alread done. So we'll use a list of run numbers to
 # determine which showers we want to do.
-corsika_list = np.load("list1.npy")
+corsika_list = np.load("corsika_list.npy")
 data = []
 for shower in protondata:
     if shower.Run in corsika_list:
