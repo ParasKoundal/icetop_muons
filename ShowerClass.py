@@ -20,7 +20,7 @@ class Shower:
         self.TotalMuons     = None
         self.nMuonPulses    = None
         self.Signals        = Signals()
-        self.Reconstruction = Reconstruction()
+        self.Reconstruction = Primary()
 
     # Functions to print a table that summarizes the shower
     # see the bottom for the function that prints the tables
@@ -42,27 +42,17 @@ class Primary:
 # attributes of the signals from the shower
 class Signals:
     def __init__(self):
-        self.Tank     = []
-        self.LatDist  = []
-        self.MuonPE   = []
-        self.OtherPE  = []
-        self.TotalPE  = []
-        self.HLCVEM   = []
-        self.SLCVEM   = []
-        self.TotalVEM = []   
-        self.nMuons   = []
+        self.Tank      = []
+        self.LatDist   = []
+        self.MuonPE    = []
+        self.OtherPE   = []
+        self.TotalPE   = []
+        self.HLCVEM    = []
+        self.SLCVEM    = []
+        self.TotalVEM  = []   
+        self.nMuons    = []
+        self.TimeDelay = []
 
-class Reconstruction:
-    def __init__(self):
-        self.E_Proton = None
-        self.E_Iron   = None
-        self.x        = None
-        self.y        = None
-        self.z        = None
-        self.zen      = None
-        self.S500     = None
-    def CoreDist(self):
-        return np.sqrt(self.x**2 + self.y**2)
 # ----------------------------------------------------------------------
 # ----------------------------------------------------------------------
 
@@ -105,6 +95,22 @@ def which_tank(key):
 
 
 
+# This function calculates the time delay of a signal
+def time_delay(tcr,xc,yc,zc,N,key,geometry,tpulse):
+    
+    # direction of the shower
+    nx,ny,nz = N
+    
+    # location of current tank
+    xi   = geometry.omgeo[key].position.x 
+    yi   = geometry.omgeo[key].position.y 
+    zi   = geometry.omgeo[key].position.z
+    
+    c = 0.3 # speed of light (m/ns)
+
+    time_delay = tcr + nx*(xi-xc)+ny*(yi-yc) - np.sqrt(1-nx**2-ny**2)*(zi-zc)/c - tpulse
+    return time_delay
+
 
 
 
@@ -126,7 +132,6 @@ def print_table(self,dist):
     print "Shower core is {0:.2f}m from the center of IceTop".format(self.Primary.CoreDist())
     print str(self.TotalMuons)+" muons hit detectors"
     print "There were",self.nMuonPulses,"muon pulses in IceTop"
-    #print "S500 = {0:.4f}".format(self.S500)
     print "{0:->130}".format("\n")
 
     # TANK-BY-TANK DATA ---------------------------
@@ -135,14 +140,14 @@ def print_table(self,dist):
     else:
         print "Below are the signals in each tank >"+str(dist)+"m from the core (excluding tanks with no signal):\n"
     
-    print "{0:<18}{1:>9}{2:^14}{3:^14}{4:^14}{5:^14}{6:^14}{7:^14}{8:^14}".format(
-            " ","Lateral Dist (m)","Muon PEs","Other PEs","Total PEs","HLCs (VEM)","SLCs (VEM)","Total VEM","nMuons")
+    print "{0:<18}{1:>16}{2:^12}{3:^12}{4:^12}{5:^12}{6:^12}{7:^12}{8:^8}{9:>16}".format(
+            " ","Lateral Dist (m)","Muon PEs","Other PEs","Total PEs","HLCs (VEM)","SLCs (VEM)","Total VEM","nMuons","Time Delay (ns)")
     s = self.Signals
     for i in range(len(s.Tank)):
         if s.TotalPE[i] + s.TotalVEM[i] != 0:
             if s.LatDist[i] >= dist:
-                print "{0:<18}{1:>9.2f}{2:>14.0f}{3:>14.0f}{4:>14.0f}{5:>14.2f}{6:>14.2f}{7:>14.2f}{8:>14.0f}".format(
-                    s.Tank[i],s.LatDist[i],s.MuonPE[i],s.OtherPE[i],s.TotalPE[i],s.HLCVEM[i],s.SLCVEM[i],s.TotalVEM[i],s.nMuons[i])
+                print "{0:<18}{1:>10.2f}{2:>14.0f}{3:>12.0f}{4:>12.0f}{5:>12.2f}{6:>12.2f}{7:>12.2f}{8:>8.0f}{9:>16.3f}".format(
+                    s.Tank[i],s.LatDist[i],s.MuonPE[i],s.OtherPE[i],s.TotalPE[i],s.HLCVEM[i],s.SLCVEM[i],s.TotalVEM[i],s.nMuons[i],s.TimeDelay[i])
 
 
     # Bottom frame

@@ -22,7 +22,7 @@ if not 'I3_BUILD' in os.environ:
 import numpy as np
 import glob
 
-from ShowerClass import Shower, LatDist, which_tank
+from ShowerClass import Shower, LatDist, which_tank, time_delay
 
 from icecube.dataio import I3File
 from icecube import icetray, dataclasses, recclasses, simclasses
@@ -82,8 +82,7 @@ for file_number in range(nfiles):
         zen = shower.Primary.zen = MCPrim.dir.zenith # in radians
         azi = MCPrim.dir.azimuth # in radians
 
-        # unit vector pointing back along primary trajectory 
-        # (will be used for axis dist.)
+        # shower direction
         nx = -np.sin(zen)*np.cos(azi)
         ny = -np.sin(zen)*np.sin(azi)
         nz = -np.cos(zen)
@@ -103,18 +102,18 @@ for file_number in range(nfiles):
         Signals_dict = dict()
 
         # Fill the dictionary with tank names, and their lateral distances
-        # I also leave 6 empty entries in an array to hold the signal data below
+        # I also leave 7 empty entries in an array to hold the signal data below
         for i in range(1,10):
             for j in [1,2]:
                 tank = "Station0"+str(i)+"_Tank"+str(j)
-                Signals_dict[tank] = np.zeros(7)
+                Signals_dict[tank] = np.zeros(8)
                 key = icetray.OMKey(i,j+61)
                 Signals_dict[tank][0] = LatDist(xc,yc,zc,N,key,geometry)
 
         for i in range(10,82):
             for j in [1,2]:
                 tank = "Station"+str(i)+"_Tank"+str(j)
-                Signals_dict[tank] = np.zeros(7)
+                Signals_dict[tank] = np.zeros(8)
                 key = icetray.OMKey(i,j+61)
                 Signals_dict[tank][0] = LatDist(xc,yc,zc,N,key,geometry)
 
@@ -177,7 +176,10 @@ for file_number in range(nfiles):
             for p in pulses:
                 if p.charge > 0 and np.abs(tcr - p.time) <= 1000:
                     tank = which_tank(key)
-                    Signals_dict[tank][4] += p.charge  
+                    Signals_dict[tank][4] += p.charge
+                    tpulse = p.time
+                    tdelay = time_delay(tcr,xc,yc,zc,N,key,geometry,tpulse) 
+                    Signals_dict[tank][7] = tdelay 
 
         events_SLC  = dataclasses.I3RecoPulseSeriesMap.from_frame(frame,
                                                     'OfflineIceTopSLCVEMPulses')
@@ -187,7 +189,10 @@ for file_number in range(nfiles):
             for p in pulses:
                 if p.charge > 0 and np.abs(tcr - p.time) <= 1000:
                     tank = which_tank(key)
-                    Signals_dict[tank][5] += p.charge 
+                    Signals_dict[tank][5] += p.charge
+                    tpulse = p.time
+                    tdelay = time_delay(tcr,xc,yc,zc,N,key,geometry,tpulse)
+                    Signals_dict[tank][7] = tdelay   
 
         # add the total signal in VEM
         for tank in Signals_dict:
@@ -206,6 +211,7 @@ for file_number in range(nfiles):
             shower.Signals.SLCVEM.append(Signals_dict[tank][5])
             shower.Signals.TotalVEM.append(Signals_dict[tank][6])
             shower.Signals.nMuons.append(-1)
+            shower.Signals.TimeDelay.append(Signals_dict[tank][7])
 
 
         # ----------------------------------------------------------------------
@@ -213,8 +219,14 @@ for file_number in range(nfiles):
         # ----------------------------------------------------------------------
 
         Laputop = frame["LaputopStandard"]
-        LaputopParams = frame["LaputopStandardParams"]
+        LaputopParams = recclasses.I3LaputopParams.from_frame(frame,"LaputopStandardParams")
+        shower.Reconstruction.x = Laputop.pos.x
+        shower.Reconstruction.y = Laputop.pos.y
+        shower.Reconstruction.z = Laputop.pos.z   
+        shower.Reconstruction.zen = Laputop.dir.zenith
+        shower.Reconstruction.Energy = LaputopParams.energy(recclasses.LaputopEnergy.ICRC2015_H4a_E27)*10**9
         
+        """
         shower.Reconstruction.E_Proton = LaputopParams.e_proton*10**9
         shower.Reconstruction.E_Iron = LaputopParams.e_iron*10**9
         shower.Reconstruction.x = Laputop.pos.x
@@ -222,7 +234,7 @@ for file_number in range(nfiles):
         shower.Reconstruction.z = Laputop.pos.z
         shower.Reconstruction.zen = Laputop.dir.zenith
         shower.Reconstruction.S500 = LaputopParams.s500
-        
+        """
         
         # ----------------------------------------------------------------------
         # Save Shower ----------------------------------------------------------
