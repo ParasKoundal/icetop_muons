@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # This script makes a plot of signals vs VEMs from muons
-# It bins showers by energy ranges (found in settings) and plots each range as a
+# It bins showers by zenith angle (found in settings) and plots each range as a
 # different color. The points on the plot are also binned and averaged, and a
 # and a line is fit to the averages
 
